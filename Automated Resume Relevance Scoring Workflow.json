@@ -1,0 +1,349 @@
+{
+  "name": "Automated Resume Relevance Scoring Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "18Me3VVVWzPkcNjiuBrfW73IzmHkvhwRf",
+          "mode": "list",
+          "cachedResultName": "Resumes",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/18Me3VVVWzPkcNjiuBrfW73IzmHkvhwRf"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "73c785ec-da6e-4f12-8b30-6b1fde3ae5e0",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "yCP7mUBTJcHYrl5q",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1iMjvVlf8TfahOf7chAW6dSgw5gy6jHIw",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "49cbb3b3-a3cf-43a1-8c69-d1987d53a491",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "yCP7mUBTJcHYrl5q",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "1gKvfE_ifyH9rQfcjBIQn_qyXaRpCrQuk",
+          "mode": "list",
+          "cachedResultName": "JD_ SMEG_RM.pdf",
+          "cachedResultUrl": "https://drive.google.com/file/d/1gKvfE_ifyH9rQfcjBIQn_qyXaRpCrQuk/view?usp=drivesdk"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        624,
+        0
+      ],
+      "id": "26c65bde-d145-4966-beb3-a5adb76720a1",
+      "name": "Download file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "yCP7mUBTJcHYrl5q",
+          "name": "Google Drive OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=You are an AI recruitment assistant.\n\nCompare the candidate resume against the provided Job Description.\n\nAnalyze:\n1. Skills match\n2. Relevant experience\n3. Education relevance\n4. Role alignment\n5. Overall suitability\n\nReturn output STRICTLY in JSON format:\n\n{\n  \"candidate_name\": \"\",\n  \"candidate_mobile\": \"\",\n  \"candidate_email\": \"\",\n  \"relevance_score\": \"\",\n  \"recommendation\": \"\",\n  \"reasoning\": \"\"\n}\n\nRecommendation rules:\n- 80+ = Strong Fit\n- 60-79 = Moderate Fit\n- Below 60 = Low Fit\n\nJob Description:\n{{ $('Extract JD Text').item.json.text }}\n\nCandidate Resume:\n{{ $('Extract Resume Text').item.json.text }}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2.3,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "c81f2545-470f-481b-9d03-f12aa1a4479a",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": null,
+          "name": "",
+          "__aiGatewayManaged": true
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "cc5693e0-3a22-4fd9-9089-5af1859aa4e1",
+      "name": "Extract Resume Text"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        832,
+        0
+      ],
+      "id": "6e0493f0-1ba7-4484-a64e-1f288a94603d",
+      "name": "Extract JD Text"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1Ddh4YHH3bqR0FJOAfSJwGyX4OIqibJO7nGk9rZ7ys_E",
+          "mode": "list",
+          "cachedResultName": "Resume Evaluation Output",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Ddh4YHH3bqR0FJOAfSJwGyX4OIqibJO7nGk9rZ7ys_E/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1Ddh4YHH3bqR0FJOAfSJwGyX4OIqibJO7nGk9rZ7ys_E/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Candidate Email": "=candidate_email",
+            "Resume File Name": "={{ $('Google Drive Trigger').item.json.name }}",
+            "Resume File Link": "={{ $('Google Drive Trigger').item.json.webViewLink }}",
+            "Relevance Score": "=relevance_score",
+            "Recommendation": "=recommendation",
+            "Evaluated On": "2026-05-23",
+            "Candidate Name": "=candidate_name"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Candidate Name",
+              "displayName": "Candidate Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Candidate Email",
+              "displayName": "Candidate Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Resume File Name",
+              "displayName": "Resume File Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Resume File Link",
+              "displayName": "Resume File Link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Relevance Score",
+              "displayName": "Relevance Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Recommendation",
+              "displayName": "Recommendation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Evaluated On",
+              "displayName": "Evaluated On",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1392,
+        0
+      ],
+      "id": "15c0807b-153f-4216-8166-5c43b79d7e80",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "4sHfM3gBUPurefwb",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract Resume Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file1": {
+      "main": [
+        [
+          {
+            "node": "Extract JD Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Resume Text": {
+      "main": [
+        [
+          {
+            "node": "Download file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract JD Text": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "a9f3b86e-395a-4db1-9f63-adb5ab5a1f2d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "3d77b1cb5ae78196eeb915f7521007ec8edd99f44958c630f5c2499303d3b35f"
+  },
+  "id": "jJ9bikC745mOj9PQ",
+  "tags": []
+}
